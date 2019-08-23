@@ -1,0 +1,365 @@
+type Author {
+  id: ID!
+  fullName: String
+  standardForm: String
+  ipniId: String
+  name: String
+}
+
+type AuthorPaginator {
+  paginatorInfo: PaginatorInfo!
+  data: [Author!]!
+}
+
+"""A date string with format 'Y-m-d', e.g. '2011-05-23'."""
+scalar Date
+
+"""
+A datetime string with format 'Y-m-d H:i:s', e.g. '2018-01-01 13:00:00'.
+"""
+scalar DateTime
+
+type Distribution {
+  id: ID!
+  location: Location!
+  occurrenceStatus: String
+}
+
+type Location {
+  id: ID!
+  name: String!
+  code: String!
+}
+
+type NameCategory {
+  id: ID!
+  maxParentsAllowed: Int!
+  minParentsRequired: Int!
+  name: String!
+  sortOrder: Int!
+}
+
+type NameGroup {
+  id: ID!
+  name: String!
+}
+
+type NameRank {
+  id: ID!
+  name: String!
+  hasParent: Boolean!
+  parentRank: NameRank
+  nameGroup: NameGroup
+}
+
+type NameStatus {
+  id: ID!
+  name: String!
+  display: Boolean
+  nomIlleg: Boolean
+  nomInval: Boolean
+  nameGroup: NameGroup
+}
+
+type NameType {
+  id: ID!
+  name: String!
+  cultivar: Boolean
+  formula: Boolean
+  hybrid: Boolean
+  scientific: Boolean
+  nameGroup: NameGroup
+}
+
+input OrderByClause {
+  field: String!
+  order: SortOrder!
+}
+
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+
+  """Total number of node in connection."""
+  total: Int
+
+  """Count of nodes in current request."""
+  count: Int
+
+  """Current page of request."""
+  currentPage: Int
+
+  """Last page in connection."""
+  lastPage: Int
+}
+
+type PaginatorInfo {
+  """Total count of available items in the page."""
+  count: Int!
+
+  """Current pagination page."""
+  currentPage: Int!
+
+  """Index of first item in the current page."""
+  firstItem: Int
+
+  """If collection has more pages."""
+  hasMorePages: Boolean!
+
+  """Index of last item in the current page."""
+  lastItem: Int
+
+  """Last page number of the collection."""
+  lastPage: Int!
+
+  """Number of items per page in the collection."""
+  perPage: Int!
+
+  """Total items available in the collection."""
+  total: Int!
+}
+
+type Query {
+  authors(
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): AuthorPaginator
+  author(id: ID): Author
+  taxonomicNames(
+    fullName: String
+
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): TaxonomicNamePaginator
+  taxonomicName(id: ID): TaxonomicName
+  taxonomicNameUsages(
+    filter: TaxonomicNameUsageFilter
+
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): TaxonomicNameUsagePaginator
+  taxonomicNameUsage(id: ID): TaxonomicNameUsage
+  references(
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): ReferencePaginator
+  reference(id: ID): Reference
+}
+
+type RefAuthorRole {
+  id: ID!
+  name: String!
+}
+
+type RefType {
+  id: ID!
+  name: String!
+  parent: RefType
+  parentOptional: Boolean
+  useParentDetails: Boolean
+}
+
+type Reference {
+  id: ID!
+  author: Author!
+  citation: String
+  shortRef: String
+  displayTitle: String
+  doi: String
+  edition: String
+
+  """
+  Instances for a reference. For references only standalone instances are 
+  provided.
+  """
+  taxonomicNameUsages(
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): TaxonomicNameUsagePaginator
+  relationshipUsages(
+    """Limits number of fetched elements."""
+    count: Int!
+
+    """The offset from which elements are returned."""
+    page: Int
+  ): RelationshipUsagePaginator
+  isbn: String
+  issn: String
+  pages: String
+  parent: Reference
+  publicationDate: Date
+  published: Boolean
+  publishedLocation: String
+  publisher: String
+  refAuthorRole: RefAuthorRole!
+  refType: RefType!
+  title: String!
+  tl2: String
+  uri: String
+  verbatimAuthor: String
+  volume: String
+  year: Int
+}
+
+type ReferencePaginator {
+  paginatorInfo: PaginatorInfo!
+  data: [Reference!]!
+}
+
+type RelationshipUsage {
+  id: ID!
+  usageType: UsageType
+  taxonomicName: TaxonomicName
+  accordingTo: Reference
+  citedNameUsage: TaxonomicNameUsage
+  citingNameUsage: TaxonomicNameUsage
+}
+
+type RelationshipUsagePaginator {
+  paginatorInfo: PaginatorInfo!
+  data: [RelationshipUsage!]!
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+type TaxonomicName {
+  id: ID!
+
+  """Name string without authors; may include rank prefix"""
+  fullName: String!
+  genericName: String
+  infragenericEpithet: String
+  specificEpithet: String
+  infraspecificEpithet: String
+  cultivarEpithet: String
+  authorship: String
+  fullNameWithAuthorship: String
+  author: Author
+  exAuthor: Author
+  basionymAuthor: Author
+  basionymExAuthor: Author
+  namePublishedIn: Reference
+  publishedYear: Int
+  rank: NameRank!
+  verbatimRank: String
+  nomenclaturalCode: String
+
+  """
+  Status under the nomenclatural code that applies to the group of organisms 
+  being named.
+  """
+  nomenclaturalStatus: NameStatus!
+  taxonomicNameUsages: [TaxonomicNameUsage!]
+  relationshipUsages: [RelationshipUsage]
+  basionym: TaxonomicName
+  basionymOf: [TaxonomicName]
+}
+
+type TaxonomicNamePaginator {
+  paginatorInfo: PaginatorInfo!
+  data: [TaxonomicName!]!
+}
+
+type TaxonomicNameUsage {
+  id: ID!
+  taxonomicName: TaxonomicName
+  accordingTo: Reference!
+  microReference: String
+  verbatimNameString: String
+  taxonomicNameUsageLabel: String
+  usageType: UsageType
+  notes: [TaxonomicNameUsageNote]
+
+  """Accepted name usage for this Taxonomic Name Usage."""
+  acceptedNameUsage: TaxonomicNameUsage
+  acceptedNameUsageFor: [TaxonomicNameUsage]
+  parent: TaxonomicNameUsage
+  children: [TaxonomicNameUsage]
+  classification: [TaxonomicNameUsage]
+  branch: [TreeNode]
+  distribution: [Distribution]
+  relationshipUsages: [RelationshipUsage]
+  heterotypicSynonymUsages: [RelationshipUsage]
+  homotypicSynonymUsages: [RelationshipUsage]
+  misapplicationUsages: [RelationshipUsage]
+}
+
+input TaxonomicNameUsageFilter {
+  name: String
+  taxonomicStatus: String
+  nomenclaturalStatus: String
+  taxonomicNameUsageType: String
+  protonym: Boolean
+  primary: Boolean
+  newTaxon: Boolean
+  newCombination: Boolean
+  newName: Boolean
+  newStatus: Boolean
+  autonym: Boolean
+}
+
+type TaxonomicNameUsageNote {
+  id: ID!
+  kindOfNote: String!
+  value: String!
+}
+
+type TaxonomicNameUsagePaginator {
+  paginatorInfo: PaginatorInfo!
+  data: [TaxonomicNameUsage!]!
+}
+
+type TreeNode {
+  id: ID!
+  path: String!
+  taxonomicNameUsage: TaxonomicNameUsage!
+}
+
+type UsageType {
+  id: ID!
+  citing: Boolean
+  doubtful: Boolean
+  hasLabel: String
+  misapplied: Boolean
+  name: String!
+  nomenclatural: Boolean
+  ofLabel: String
+  primaryInstance: Boolean
+  proParte: Boolean
+  protologue: Boolean
+  relationship: Boolean
+  secondaryInstance: Boolean
+  sortOrder: Int
+  standalone: Boolean
+  synonym: Boolean
+  taxonomic: Boolean
+  unsourced: Boolean
+  bidirectional: Boolean
+}
